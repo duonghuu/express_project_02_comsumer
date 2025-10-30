@@ -1,40 +1,48 @@
-import express, { Application } from "express";
+import { redis } from "@config/redis";
+import { CallResponsysService } from "@services/callResponsysService";
+import axios from "axios";
 import dotenv from "dotenv";
-import fs from "fs";
-import path from "path";
-import { responsysQueue } from "@workers/queue";
-import helmet from "helmet";
-import morgan from "morgan";
-import router from "@routes/index"
-import { connectDB } from "@config/database";
-import { Product } from "@models/Product";
-
 dotenv.config();
+import { Worker } from "bullmq";
+const worker = new Worker(
+  "resapi_queue",
+  async (job) => {
 
-const app: Application = express();
-// Middleware
-app.use(helmet());             // helmet header
-// === Setup log file ===
-const logDir = path.join(process.cwd(), "logs");
-if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
-const logFile = path.join(logDir, "access.log");
-const logStream = fs.createWriteStream(logFile, { flags: "a" });
-app.use(morgan("combined", { stream: logStream }));
-app.use(morgan("dev"));        // log request to console
-app.use(express.json());
+    const { type, data } = job.data;
 
-app.use("/", router);
+    try {
 
-(async () => {
-  try {
-    const db = await connectDB();
-    // const repo = db.getMongoRepository(Product);
-    // await repo.save({ name: 'Test', price: 100 });
-    const port = process.env.PORT || 3000;
-    app.listen(port, () => console.log(`🚀 Server running on port ${port}`));
+      switch (type) {
+        case "ADD_ACTIVITY":
+          const config = {
+            method: 'post',
+            url: `${process.env.RESPONSYS_ENDPOINT}/rest/api/v1.3/folders/Banking/suppData/Activity_${data.activity}/members`,
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": null
+            },
+            data
+          };
+          let res = await axios(config);
+          const result = res.data;
+          console.log(result)
+          const insertResult = await CallResponsysService.create(result);
 
-  } catch (error) {
-    console.error("❌ Database connection failed:", error);
-    process.exit(1);
+          return result;
+
+        default:
+          throw new Error(`Không hỗ trợ job type: ${type}`);
+      }
+    } catch (err) {
+      // Trả lỗi để BullMQ biết job này fail và retry
+      throw err;
+    }
+  },
+  {
+    connection: redis,
+    limiter: {
+      max: 6,          // tối đa 6 job
+      duration: 60000 // trong 60 giây (1 phút)
+    },
   }
-})();
+);
