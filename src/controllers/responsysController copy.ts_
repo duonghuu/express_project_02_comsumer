@@ -1,0 +1,31 @@
+import { redis } from "@config/redis";
+import { responsysQueue } from "@workers/queue";
+import dayjs from "dayjs";
+import { Request, Response } from "express";
+import fs from "fs";
+
+export const responsysController = {
+    async handleRegister(req: Request, res: Response): Promise<void> {
+        // res.send(req.body);
+        const endpoint = `/rest/api/v1.3/folders/Banking/suppData/Lead_Form_Data/members`
+        // const jobId = `${endpoint}_${Date.now()}`; // identify theo endpoint
+        // const data = {
+        //     endpoint
+        // }
+        const job = await responsysQueue.add('sendRequest', { endpoint, name: req.body.name, email: req.body.email });
+        fs.appendFileSync(
+            "logs/receive.log",
+            `[${dayjs().format("D/M/YYYY H:mm:ss")}] ${job?.id}\n`
+        );
+        // res.json({ success: true });
+
+        // Thêm phần tử vào list
+        // await redis.rpush("queue", "job1");
+        // await redis.rpush("queue", "job2");
+        // const job = await redis.lpop("queue");
+        // res.json({ job });
+
+        // await responsysQueue.add("sendEmail", { to: `user${new Date().toISOString()}@example.com` });
+        res.json({ success: true });
+    },
+};
