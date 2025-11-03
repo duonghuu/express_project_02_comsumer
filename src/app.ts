@@ -1,10 +1,10 @@
 import { redis } from "@config/redis";
-import { CallResponsysService } from "@services/callResponsysService";
-import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
 import { Worker } from "bullmq";
 import { ResponsysService } from "@services/responsysService";
+import { MKTADBService } from "@services/mktaDbService";
+import _ from "lodash";
 const worker = new Worker(
   "resapi_queue",
   async (job) => {
@@ -21,6 +21,22 @@ const worker = new Worker(
         timestamp: data.timestamp,
         params: data.params,
       };
+      if (activityData.activity == "Esign" && data?.feol_account_status == 'active') {
+        const getRecord = await MKTADBService.getItemByField('feol_account_id', data?.feol_account_id);
+        if (getRecord?.feol_account_status != "active") {
+          const updatedData = {
+            "feol_account_status": "active",
+            "customer_id_lv2": data?.customer_id
+          };
+          await MKTADBService.update(data?.feol_account_id, updatedData);
+          const updatedProfile = {
+            "CUSTOMER_ID_": data?.customer_id,
+            "RIID_": getRecord?.RIID,
+          }
+          await ResponsysService.callContactAPI("RIID_", "", updatedProfile);
+        }
+      }
+
       ///
       await ResponsysService.callActivityAPI(true, activityData.activity, activityData);
 
@@ -40,27 +56,6 @@ const worker = new Worker(
       ///
       await ResponsysService.callTriggerEventAPI(triggerData.event, triggerData, null)
 
-      // switch (type) {
-      //   case "ADD_ACTIVITY":
-      //     const config = {
-      //       method: 'post',
-      //       url: `${process.env.RESPONSYS_ENDPOINT}/rest/api/v1.3/folders/Banking/suppData/Activity_${data.activity}/members`,
-      //       headers: {
-      //         "Content-Type": "application/json",
-      //         "Authorization": null
-      //       },
-      //       data
-      //     };
-      //     let res = await axios(config);
-      //     const result = res.data;
-      //     console.log(result)
-      // const insertResult = await CallResponsysService.create(result);
-
-      //     return result;
-
-      //   default:
-      //     throw new Error(`Không hỗ trợ job type: ${type}`);
-      // }
     } catch (err) {
       // Trả lỗi để BullMQ biết job này fail và retry
       throw err;

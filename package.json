@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon -r tsconfig-paths/register src/app.ts",
-    "worker": "ts-node -r tsconfig-paths/register src/workers/taskWorker.ts",
     "build": "tsc",
     "start": "node dist/app.js"
   },

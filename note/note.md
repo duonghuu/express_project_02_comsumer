@@ -71,5 +71,26 @@ Test signup_s2s
 - Controller
 - Service
 - Save to DB
+===
+### call api responsys cập nhật customer_id
+khi nhận request trigger có activity là esign và feol_account_status là active
+sẽ có feol_account_id và feol_account_status
+kiểm tra table mktadb record khớp feol_account_id đang có status là active hay inactive
+update thông tin record nếu mktadb đang store data là inactive
+update lại customer_id_lv2, status
+call api responsys cập nhật customer_id
+
+---
+func updateMKTADBRecord
+  nếu req.activity là esign và feol_account_status là active
+  getRecord = query db get record by feol_account_id
+  nếu getRecord.feol_account_status == inactive
+    updated.feol_account_status == active
+    updated.customer_id_lv2 == req.customer_id
+    gọi hàm updateResponsysProfile
+
+func updateResponsysProfile
+  call api xử lý update
+  
 
 

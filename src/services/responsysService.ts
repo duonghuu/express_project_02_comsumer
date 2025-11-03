@@ -63,6 +63,8 @@ export const ResponsysService = {
         return result;
     },
     async callActivityAPI(isCustomer: boolean, activityName: any, data: any) {
+        // nếu activityName == Esign
+        // goi ham xu ly kiem tra xem co update gì khong
         // console.log('callActivityAPI', process.env)
         //call responsys api
         let result = {};
@@ -134,7 +136,7 @@ export const ResponsysService = {
 
             let res = await axios(config);
             result = res.data;
-            await CallResponsysService.create(result);
+            await CallResponsysService.create([config.url, result]);
 
             console.log('callActivityAPI :: success', activityName);
 
@@ -211,7 +213,7 @@ export const ResponsysService = {
             let res = await axios(config);
             result = res.data;
             console.log('callTriggerEventAPI :: success', res);
-            await CallResponsysService.create(result)
+            await CallResponsysService.create([config.url, result])
 
             /*
             if (result.success === true) {
@@ -293,7 +295,7 @@ export const ResponsysService = {
 
             let res = await axios(config);
             result = res.data;
-            const insertResult = await CallResponsysService.create(result);
+            const insertResult = await CallResponsysService.create([config.url, result]);
             if (result.recordData && result.recordData.records && result.recordData.records.length) {
                 result = result.recordData.records[0];
             }
@@ -322,6 +324,5 @@ export const ResponsysService = {
     },
     async create(data: any) {
         return ResponsysRepository.create(data);
-    },
-
+    }
 };

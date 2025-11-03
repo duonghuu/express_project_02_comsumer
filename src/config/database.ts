@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { Responsys } from "@models/Responsys";
 import { CallResponsys } from "@models/CallResponsys";
+import { MKTADB } from "@models/MKTADB";
 
 
 let dataSource: DataSource | null = null;
@@ -19,7 +20,7 @@ export const connectDB = async (): Promise<DataSource> => {
         authSource: 'admin',
         synchronize: true, // auto sync entity → collection
         logging: false,
-        entities: [Responsys, CallResponsys]
+        entities: [Responsys, CallResponsys, MKTADB]
         // migrations: ["src/database/migrations/*.ts"],
     });
 
