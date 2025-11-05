@@ -2,6 +2,8 @@ import axios from "axios";
 import { ResponsysRepository } from "repositories/responsysRepository";
 import { CallResponsysService } from "./callResponsysService";
 import { v4 as uuidv4 } from 'uuid';
+import { getEnv } from "utils/getEnv";
+import { utils } from "utils";
 // import * as CryptoJS from 'crypto-js';
 
 //         let hash = CryptoJS.SHA256(randomNID);
@@ -10,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 // var password = decrypted.toString(CryptoJS.enc.Utf8);
 export const ResponsysService = {
     authToken: null,
-    endPoint: process.env.RESPONSYS_ENDPOINT, // Replace with actual endpoint
+    endPoint: getEnv('RESPONSYS_ENDPOINT'), // Replace with actual endpoint
     API_PROFILE_LIST: 'Resp_Banking_Customers',
     API_FOLDER: 'Banking',
     /*
@@ -45,10 +47,6 @@ export const ResponsysService = {
             return false;
         }
     */
-    getDate(dateStr: string) {
-        let timestamp = new Date(dateStr);
-        return timestamp.getFullYear() + '/' + (timestamp.getMonth() + 1) + "/" + timestamp.getDate() + " " + timestamp.getHours() + ":" + timestamp.getMinutes() + ":" + timestamp.getSeconds();
-    },
     async processActivity(isCustomer: boolean, activity: any, data: any): Promise<any> {
 
         let result = await this.callActivityAPI(isCustomer, activity, data);
@@ -87,7 +85,7 @@ export const ResponsysService = {
             data.email_address ? data.email_address : "",
             data.mobile_number ? data.mobile_number : "",
             data.app_source ? data.app_source : "",
-            this.getDate(data.timestamp)
+            utils.getDate(data.timestamp)
         ];
 
         if (isCustomer) {
@@ -126,7 +124,7 @@ export const ResponsysService = {
         try {
             const config = {
                 method: 'post',
-                url: `${process.env.RESPONSYS_ENDPOINT}/rest/api/v1.3/folders/Banking/suppData/Activity_${activityName}/members`,
+                url: `${this.endPoint}/rest/api/v1.3/folders/Banking/suppData/Activity_${activityName}/members`,
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": null
@@ -202,7 +200,7 @@ export const ResponsysService = {
         try {
             const config = {
                 method: 'post',
-                url: `${process.env.RESPONSYS_ENDPOINT}/rest/api/v1.3/events/${eventName}`,
+                url: `${this.endPoint}/rest/api/v1.3/events/${eventName}`,
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": null
@@ -282,7 +280,7 @@ export const ResponsysService = {
         try {
             const config = {
                 method: 'post',
-                url: `${process.env.RESPONSYS_ENDPOINT}/rest/api/v1.3/lists/${this.API_PROFILE_LIST}/members`,
+                url: `${this.endPoint}/rest/api/v1.3/lists/${this.API_PROFILE_LIST}/members`,
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": this.authToken

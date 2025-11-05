@@ -57,15 +57,15 @@ const worker = new Worker(
       await ResponsysService.callTriggerEventAPI(triggerData.event, triggerData, null)
 
     } catch (err) {
-      // Trả lỗi để BullMQ biết job này fail và retry
+      // Let BullMQ know job fail and retry
       throw err;
     }
   },
   {
     connection: redis,
     limiter: {
-      max: 6,          // tối đa 6 job
-      duration: 60000 // trong 60 giây (1 phút)
+      max: 6,          // max 6 job
+      duration: 60000 // 60 seconds/minute
     },
   }
 );

@@ -14,8 +14,6 @@ export const MKTADBService = {
 
         const result = await MKTADBRepository.update(id, data);
 
-        // 3️⃣ (Tuỳ chọn) Gọi API ngoài nếu cần đồng bộ dữ liệu
-        // ví dụ: cập nhật thông tin lên Responsys
         /*
         await axios.put(
           `${this.endPoint}/rest/api/v1.3/lists/${this.API_PROFILE_LIST}/members`,
@@ -26,7 +24,6 @@ export const MKTADBService = {
         );
         */
 
-        // 4️⃣ Trả kết quả
         return result;
     },
     async getItemByField(field: string, value: any) {

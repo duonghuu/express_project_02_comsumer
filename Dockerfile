@@ -4,10 +4,12 @@ WORKDIR /app
 # Copy các file cần thiết
 RUN corepack enable
 COPY package.json ./
+COPY pnpm-lock.yaml ./
 
-RUN yarn install
-COPY dist ./dist
+RUN pnpm install
+COPY src ./src
 COPY tsconfig.json ./tsconfig.json
+RUN pnpm build
+EXPOSE 4000
 
-
-CMD ["node", "-r", "tsconfig-paths/register", "dist/app.js"]
+CMD ["pnpm", "dev"]
