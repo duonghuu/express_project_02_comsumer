@@ -64,7 +64,7 @@ const worker = new Worker(
   {
     connection: redis,
     limiter: {
-      max: 6,          // max 6 job
+      max: 200,          // max 6 job
       duration: 60000 // 60 seconds/minute
     },
   }
