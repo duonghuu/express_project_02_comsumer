@@ -2,11 +2,11 @@
   "name": "express_project_02_comsumer",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/app.js",
   "scripts": {
     "dev": "nodemon -r tsconfig-paths/register src/app.ts",
     "build": "tsc",
-    "start": "node dist/app.js"
+    "start": "bun run dist/app.js"
   },
   "keywords": [],
   "author": "",

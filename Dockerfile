@@ -1,15 +1,14 @@
-FROM node:20-alpine
+FROM oven/bun:alpine
 WORKDIR /app
 
-# Copy các file cần thiết
-RUN corepack enable
 COPY package.json ./
-COPY pnpm-lock.yaml ./
+COPY bun.lock ./
 
-RUN pnpm install
+RUN bun install --frozen-lockfile
 COPY src ./src
 COPY tsconfig.json ./tsconfig.json
-RUN pnpm build
+COPY entrypoint.sh ./entrypoint.sh
+RUN bun run build
 EXPOSE 4000
 
-CMD ["pnpm", "dev"]
+CMD ["bun", "run", "start"]
